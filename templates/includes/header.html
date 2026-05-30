@@ -4,27 +4,27 @@
 <header class="site-header">
     <div class="container">
         <div class="header-content">
-            <a href="/projects/list" class="logo-link">TeamFinder</a>
+            <a href="/projects/list/" class="logo-link">TeamFinder</a>
 
             <nav class="main-nav">
-                <a href="/projects/list" class="nav-link">
+                <a href="/projects/list/" class="nav-link">
                     {% include 'includes/svg/home.html' %}
-                    <p>Главная</p>
+                    <p>Проекты</p>
                 </a>
-                <a href="/users/list" class="nav-link">
+                <a href="/users/list/" class="nav-link">
                     {% include 'includes/svg/participants.html' %}
-                    <p>Участники</p>
+                    <p>Команда</p>
                 </a>
             </nav>
 
             <div class="user-actions">
                 {% if request.user.is_authenticated %}
-                <a href="{% url 'projects:create_project' %}" class="black-button">
-                    + Создать проект
+                <a href="{% url 'projects:create_project' %}" class="action-button nav-link">
+                    + Новый проект
                 </a>
                 <a class="user-menu nav-link">
                     {% if request.user.avatar %}
-                        <img src="{{ request.user.avatar.url }}" alt="Аватар" class="avatar">
+                        <img src="{{ request.user.avatar.url }}" alt="Аватар пользователя" class="avatar">
                     {% else %}
                         <img src="{% static 'images/default-avatar.png' %}" alt="Аватар по умолчанию" class="avatar">
                     {% endif %}
@@ -33,9 +33,9 @@
                 {% else %}
                 <button class="button button-login nav-link" onclick="window.location.href='/users/login/'">
                     {% include 'includes/svg/login.html' %}
-                    <p>Войти</p>
+                    <p>Вход</p>
                 </button>
-                <button class="button button-register nav-link black" onclick="window.location.href='/users/register/'">
+                <button class="button button-register nav-link action-button" onclick="window.location.href='/users/register/'">
                     {% include 'includes/svg/register.html' %}
                     <p>Регистрация</p>
                 </button>
@@ -49,21 +49,21 @@
   <div class="sidebar-content">
 
     <a href="{% url 'users:user_detail' request.user.id %}">
-      <span>{% include 'includes/svg/profile.html' %} Мой профиль</span>
+      <span>{% include 'includes/svg/profile.html' %} Личный кабинет</span>
     </a>
 
-    <a href="{% url 'users:edit_profile' request.user.id %}">Редактировать профиль</a>
+    <a href="{% url 'users:edit_profile' request.user.id %}">Настройки профиля</a>
 
-    <a href="{% url 'users:change_password' request.user.id %}">Сменить пароль</a>
+    <a href="{% url 'users:change_password' request.user.id %}">Безопасность</a>
 
-    <a href="#" class="share-button" data-url="/users/{{ request.user.id }}">
+    <a href="#" class="share-button" data-url="/users/{{ request.user.id }}/">
       {% include 'includes/svg/share.html' %} Поделиться профилем
     </a>
-    
+
     <hr class="sidebar-divider">
 
-    <a href="{% url 'users:logout' %}" style="color: #e7000b;">
-      {% include 'includes/svg/leave.html' %} Выйти
+    <a href="{% url 'users:logout' %}" style="color: #e53e3e;">
+      {% include 'includes/svg/leave.html' %} Выйти из аккаунта
     </a>
   </div>
 </div>
