@@ -12,27 +12,28 @@ AVATAR_COLORS = [
     "#96CEB4",
     "#FFEAA7",
 ]
+AVATAR_SIZE = 200
+AVATAR_FONT_SIZE = 100
 
 
 def generate_user_avatar(user):
     if not user.name:
         return
 
-    colors = AVATAR_COLORS
-    img = Image.new("RGB", (200, 200), color=random.choice(colors))
+    img = Image.new("RGB", (AVATAR_SIZE, AVATAR_SIZE), color=random.choice(AVATAR_COLORS))
     draw = ImageDraw.Draw(img)
 
     initial = user.name[0].upper()
 
     try:
-        font = ImageFont.truetype("arial.ttf", 100)
+        font = ImageFont.truetype("arial.ttf", AVATAR_FONT_SIZE)
     except IOError:
         font = ImageFont.load_default()
 
     bbox = draw.textbbox((0, 0), initial, font=font)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
-    position = ((200 - text_width) // 2, (200 - text_height) // 2)
+    position = ((AVATAR_SIZE - text_width) // 2, (AVATAR_SIZE - text_height) // 2)
 
     draw.text(position, initial, fill="white", font=font)
 

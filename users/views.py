@@ -3,11 +3,11 @@ from http import HTTPStatus
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from projects.models import Favorite, Project
+from projects.team_finder import paginate_queryset
 
 from .forms import (ChangePasswordForm, UserEditForm, UserLoginForm,
                     UserRegistrationForm)
@@ -17,12 +17,10 @@ SKILLS_API_LIMIT = 12
 USERS_PER_PAGE = 12
 PROJECTS_PER_PAGE = 12
 
-
-def paginate_queryset(queryset, request, per_page=12):
-    """Пагинация queryset."""
-    paginator = Paginator(queryset, per_page)
-    page = request.GET.get("page")
-    return paginator.get_page(page)
+FILTER_OWNERS_OF_FAVORITE_PROJECTS = "owners-of-favorite-projects"
+FILTER_PARTICIPANTS_OF_MY_PROJECTS = "participants-of-my-projects"
+FILTER_LIKERS_OF_MY_PROJECTS = "likers-of-my-projects"
+FILTER_MEMBERS_OF_MY_PROJECTS = "members-of-my-projects"
 
 
 def register(request):
@@ -64,14 +62,22 @@ def logout_view(request):
 
 def user_detail(request, user_id):
     """Страница профиля пользователя."""
-    user = get_object_or_404(User, id=user_id)
+    user = User.objects.filter(id=user_id).first()
+    if user is None:
+        return JsonResponse(
+            {"status": "error", "message": "Пользователь не найден"}, status=HTTPStatus.NOT_FOUND
+        )
     return render(request, "users/user-details.html", {"user": user})
 
 
 @login_required
 def edit_profile(request, user_id):
     """Редактирование профиля."""
-    user = get_object_or_404(User, id=user_id)
+    user = User.objects.filter(id=user_id).first()
+    if user is None:
+        return JsonResponse(
+            {"status": "error", "message": "Пользователь не найден"}, status=HTTPStatus.NOT_FOUND
+        )
     if request.user != user:
         return redirect("users:user_detail", user_id=user.id)
 
@@ -121,34 +127,34 @@ def users_list(request):
     
     # Фильтрация по типам (Вариант 1)
     if filter_type and request.user.is_authenticated:
-        if filter_type == "owners-of-favorite-projects":
+        if filter_type == FILTER_OWNERS_OF_FAVORITE_PROJECTS:
             # Авторы избранных проектов текущего пользователя
             favorite_project_ids = Favorite.objects.filter(
                 user=request.user
-            ).values_list("project_id", flat=True)
+            ).values("project_id")
             users = users.filter(owned_projects__id__in=favorite_project_ids).distinct()
             active_filter = filter_type
-        elif filter_type == "participants-of-my-projects":
+        elif filter_type == FILTER_PARTICIPANTS_OF_MY_PROJECTS:
             # Участники проектов текущего пользователя
             my_project_ids = Project.objects.filter(
                 owner=request.user
-            ).values_list("id", flat=True)
+            ).values("id")
             users = users.filter(participated_projects__id__in=my_project_ids).distinct()
             active_filter = filter_type
-        elif filter_type == "likers-of-my-projects":
+        elif filter_type == FILTER_LIKERS_OF_MY_PROJECTS:
             # Пользователи, которым нравятся мои проекты
             my_project_ids = Project.objects.filter(
                 owner=request.user
-            ).values_list("id", flat=True)
+            ).values("id")
             users = users.filter(
                 favorite_projects__project_id__in=my_project_ids
             ).distinct()
             active_filter = filter_type
-        elif filter_type == "members-of-my-projects":
+        elif filter_type == FILTER_MEMBERS_OF_MY_PROJECTS:
             # Участники моих проектов (то же что participants-of-my-projects)
             my_project_ids = Project.objects.filter(
                 owner=request.user
-            ).values_list("id", flat=True)
+            ).values("id")
             users = users.filter(participated_projects__id__in=my_project_ids).distinct()
             active_filter = filter_type
 
@@ -190,7 +196,11 @@ def favorites_view(request):
 @login_required
 def toggle_favorite(request, project_id):
     """Добавление/удаление проекта из избранного."""
-    project = get_object_or_404(Project, id=project_id)
+    project = Project.objects.filter(id=project_id).first()
+    if project is None:
+        return JsonResponse(
+            {"status": "error", "message": "Проект не найден"}, status=HTTPStatus.NOT_FOUND
+        )
     
     if request.method == "POST":
         favorite, created = Favorite.objects.get_or_create(
@@ -215,7 +225,11 @@ def toggle_favorite(request, project_id):
 @login_required
 def add_skill(request, user_id):
     """Добавление навыка пользователю."""
-    user = get_object_or_404(User, id=user_id)
+    user = User.objects.filter(id=user_id).first()
+    if user is None:
+        return JsonResponse(
+            {"status": "error", "message": "Пользователь не найден"}, status=HTTPStatus.NOT_FOUND
+        )
     if request.user != user:
         return JsonResponse(
             {"status": "error", "message": "Нет прав"},
@@ -235,7 +249,7 @@ def add_skill(request, user_id):
         created = False
 
         if skill_id:
-            skill = Skill.objects.get(id=skill_id)
+            skill = Skill.objects.filter(id=skill_id).first()
         else:
             skill, created = Skill.objects.get_or_create(name=skill_name)
 
@@ -264,8 +278,16 @@ def add_skill(request, user_id):
 @login_required
 def remove_skill(request, user_id, skill_id):
     """Удаление навыка у пользователя."""
-    user = get_object_or_404(User, id=user_id)
-    skill = get_object_or_404(Skill, id=skill_id)
+    user = User.objects.filter(id=user_id).first()
+    if user is None:
+        return JsonResponse(
+            {"status": "error", "message": "Пользователь не найден"}, status=HTTPStatus.NOT_FOUND
+        )
+    skill = Skill.objects.filter(id=skill_id).first()
+    if skill is None:
+        return JsonResponse(
+            {"status": "error", "message": "Навык не найден"}, status=HTTPStatus.NOT_FOUND
+        )
     if request.user != user:
         return JsonResponse({"status": "error"}, status=HTTPStatus.FORBIDDEN)
 
@@ -280,12 +302,12 @@ def remove_skill(request, user_id, skill_id):
 
 def skills_api(request):
     """API для получения списка навыков."""
-    q = request.GET.get("q", "").strip()
-    if q:
-        skills = Skill.objects.filter(name__icontains=q).order_by("name")[
+    query = request.GET.get("q", "").strip()
+    if query:
+        skills = Skill.objects.filter(name__icontains=query).order_by("name")[
             :SKILLS_API_LIMIT
         ]
     else:
         skills = Skill.objects.all().order_by("name")[:SKILLS_API_LIMIT]
 
-    return JsonResponse([{"id": s.id, "name": s.name} for s in skills], safe=False)
+    return JsonResponse([{"id": skill.id, "name": skill.name} for skill in skills], safe=False)

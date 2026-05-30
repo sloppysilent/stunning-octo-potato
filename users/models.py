@@ -1,40 +1,28 @@
 # users/models.py
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .managers import UserManager
 from .utils import generate_user_avatar
+
+SKILL_NAME_MAX_LENGTH = 124
+USER_NAME_MAX_LENGTH = 124
+USER_PHONE_MAX_LENGTH = 12
+USER_ABOUT_MAX_LENGTH = 256
 
 
 class Skill(models.Model):
     """Модель навыка."""
 
-    name = models.CharField(max_length=124, unique=True)
-
-    def __str__(self):
-        return self.name
+    name = models.CharField(max_length=SKILL_NAME_MAX_LENGTH, unique=True)
 
     class Meta:
         verbose_name = "Навык"
         verbose_name_plural = "Навыки"
         ordering = ["name"]
 
-
-class UserManager(BaseUserManager):
-    """Менеджер для кастомной модели пользователя."""
-
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("Email обязателен")
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        return self.create_user(email, password, **extra_fields)
+    def __str__(self):
+        return self.name
 
 
 class User(AbstractUser):
@@ -42,14 +30,14 @@ class User(AbstractUser):
 
     username = None
     email = models.EmailField(unique=True)
-    name = models.CharField(max_length=124)
-    surname = models.CharField(max_length=124)
+    name = models.CharField(max_length=USER_NAME_MAX_LENGTH)
+    surname = models.CharField(max_length=USER_NAME_MAX_LENGTH)
     avatar = models.ImageField(
         upload_to="avatars/", blank=True, null=True
     )
-    phone = models.CharField(max_length=12, blank=True)
+    phone = models.CharField(max_length=USER_PHONE_MAX_LENGTH, blank=True)
     github_url = models.URLField(blank=True)
-    about = models.TextField(max_length=256, blank=True)
+    about = models.TextField(max_length=USER_ABOUT_MAX_LENGTH, blank=True)
     skills = models.ManyToManyField(Skill, blank=True, related_name="users")
 
     is_active = models.BooleanField(default=True)
@@ -59,6 +47,11 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ["name", "surname"]
 
     objects = UserManager()
+
+    class Meta:
+        ordering = ["-id"]
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
 
     def __str__(self):
         return f"{self.name} {self.surname}"

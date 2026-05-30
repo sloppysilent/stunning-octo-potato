@@ -2,20 +2,14 @@
 from http import HTTPStatus
 
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from .forms import ProjectForm
 from .models import STATUS_CLOSED, STATUS_OPEN, Favorite, Project
+from .team_finder import paginate_queryset
 
 PROJECTS_PER_PAGE = 12
-
-
-def paginate_queryset(queryset, request, per_page=12):
-    paginator = Paginator(queryset, per_page)
-    page = request.GET.get("page")
-    return paginator.get_page(page)
 
 
 def project_list(request):
@@ -58,7 +52,11 @@ def create_project(request):
 
 
 def project_detail(request, project_id):
-    project = get_object_or_404(Project.objects.select_related("owner"), id=project_id)
+    project = Project.objects.select_related("owner").filter(id=project_id).first()
+    if project is None:
+        return JsonResponse(
+            {"status": "error", "message": "Проект не найден"}, status=HTTPStatus.NOT_FOUND
+        )
     is_participant = request.user in project.participants.all()
     is_favorited = False
     
@@ -80,7 +78,11 @@ def project_detail(request, project_id):
 
 @login_required
 def edit_project(request, project_id):
-    project = get_object_or_404(Project, id=project_id, owner=request.user)
+    project = Project.objects.filter(id=project_id, owner=request.user).first()
+    if project is None:
+        return JsonResponse(
+            {"status": "error", "message": "Проект не найден"}, status=HTTPStatus.NOT_FOUND
+        )
 
     if request.method == "POST":
         form = ProjectForm(request.POST, instance=project)
@@ -102,7 +104,11 @@ def edit_project(request, project_id):
 
 @login_required
 def complete_project(request, project_id):
-    project = get_object_or_404(Project, id=project_id, owner=request.user)
+    project = Project.objects.filter(id=project_id, owner=request.user).first()
+    if project is None:
+        return JsonResponse(
+            {"status": "error", "message": "Проект не найден"}, status=HTTPStatus.NOT_FOUND
+        )
 
     if request.method == "POST" and project.status == STATUS_OPEN:
         project.status = STATUS_CLOSED
@@ -119,7 +125,11 @@ def complete_project(request, project_id):
 
 @login_required
 def toggle_participate(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
+    project = Project.objects.filter(id=project_id).first()
+    if project is None:
+        return JsonResponse(
+            {"status": "error", "message": "Проект не найден"}, status=HTTPStatus.NOT_FOUND
+        )
 
     if request.method == "POST":
         is_participant = project.participants.filter(id=request.user.id).exists()
