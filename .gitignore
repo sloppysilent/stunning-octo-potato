@@ -1,12 +1,4 @@
 ```
-# Database
-db.sqlite3
-
-# Environment variables
-.env
-.env.local
-*.env.*
-
 # Python
 __pycache__/
 *.pyc
@@ -17,32 +9,26 @@ env/
 venv/
 .venv/
 .ENV
-.python-version
+.ENV.local
+.env
+.env.local
+.env.*
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+.DS_Store
+
+# Migration files are already tracked
+!projects/migrations/
+
+# Dependencies
 pip-log.txt
 pip-delete-this-directory.txt
 .tox/
 .coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-*.pot
-*.pyc
-.pytest_cache/
-.mypy_cache/
-
-# Static files
-static/CACHE/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
+htmlcov/
 ```
