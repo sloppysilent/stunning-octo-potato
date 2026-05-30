@@ -10,6 +10,8 @@ User = get_user_model()
 
 
 class UserRegistrationForm(forms.ModelForm):
+    """Форма регистрации пользователя."""
+
     password = forms.CharField(widget=forms.PasswordInput, label="Пароль")
 
     class Meta:
@@ -25,11 +27,15 @@ class UserRegistrationForm(forms.ModelForm):
 
 
 class UserLoginForm(forms.Form):
+    """Форма входа в систему."""
+
     email = forms.EmailField(label="Email")
     password = forms.CharField(widget=forms.PasswordInput, label="Пароль")
 
 
 class UserEditForm(forms.ModelForm):
+    """Форма редактирования профиля."""
+
     class Meta:
         model = User
         fields = ["name", "surname", "avatar", "about", "phone", "github_url"]
@@ -71,6 +77,8 @@ class UserEditForm(forms.ModelForm):
 
 
 class ChangePasswordForm(forms.Form):
+    """Форма смены пароля."""
+
     old_password = forms.CharField(widget=forms.PasswordInput, label="Текущий пароль")
     new_password1 = forms.CharField(widget=forms.PasswordInput, label="Новый пароль")
     new_password2 = forms.CharField(

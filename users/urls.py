@@ -1,3 +1,4 @@
+# users/urls.py
 from django.urls import path
 
 from . import views
@@ -9,6 +10,12 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("list/", views.users_list, name="users_list"),
+    path("favorites/", views.favorites_view, name="favorites"),
+    path(
+        "toggle-favorite/<int:project_id>/",
+        views.toggle_favorite,
+        name="toggle_favorite",
+    ),
     path("<int:user_id>/", views.user_detail, name="user_detail"),
     path("<int:user_id>/edit/", views.edit_profile, name="edit_profile"),
     path(

@@ -6,21 +6,25 @@ from .utils import generate_user_avatar
 
 
 class Skill(models.Model):
+    """Модель навыка."""
+
     name = models.CharField(max_length=124, unique=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = "Skill"
-        verbose_name_plural = "Skills"
+        verbose_name = "Навык"
+        verbose_name_plural = "Навыки"
         ordering = ["name"]
 
 
 class UserManager(BaseUserManager):
+    """Менеджер для кастомной модели пользователя."""
+
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError("Email is required")
+            raise ValueError("Email обязателен")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -34,11 +38,15 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    """Кастомная модель пользователя."""
+
     username = None
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=124)
     surname = models.CharField(max_length=124)
-    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    avatar = models.ImageField(
+        upload_to="avatars/", blank=True, null=True
+    )
     phone = models.CharField(max_length=12, blank=True)
     github_url = models.URLField(blank=True)
     about = models.TextField(max_length=256, blank=True)
