@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Projects</h1>
+<a href="/projects/create/">Create project</a>
+{% for p in projects %}
+<div class="card">
+<h3>{{p.name}}</h3>
+<p>{{p.description}}</p>
+</div>
+{% empty %}
+<p>No projects yet</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Users</h1>
+<input id="skillSearch" placeholder="Search skill">
+<div id="suggestions"></div>
+{% for u in participants %}
+<div class="card">{{u.email}}</div>
+{% endfor %}
+<script src="/static/skills.js"></script>
+{% endblock %}

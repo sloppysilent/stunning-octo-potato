@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile_edit.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-edit-container">
+    <h2 class="form-title">Редактирование профиля</h2>
+    <form method="post" enctype="multipart/form-data" class="profile-edit-form">
+        {% csrf_token %}
+
+        <!-- Аватар -->
+        <div class="avatar-upload">
+            <div class="avatar-preview">
+                {% if form.instance.avatar %}
+                    <img src="{{ form.instance.avatar.url }}" alt="Аватар">
+                    <div class="avatar-overlay">
+                        <label for="{{ form.avatar.id_for_label }}" class="avatar-change-btn">Заменить</label>
+                    </div>
+                {% else %}
+                    <img src="{% static 'images/default-avatar.png' %}" alt="Аватар по умолчанию">
+                {% endif %}
+            </div>
+            <div style="display: none;">
+                {{ form.avatar }}
+            </div>
+        </div>
+
+        <!-- Имя и фамилия -->
+        <div class="form-row">
+            <div class="form-field">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+            </div>
+            <div class="form-field">
+                {{ form.surname.label_tag }}
+                {{ form.surname }}
+            </div>
+        </div>
+
+        <!-- О себе -->
+        <div class="form-field">
+            {{ form.about.label_tag }}
+            {{ form.about }}
+        </div>
+
+        <!-- Телефон и GitHub -->
+        <div class="form-row">
+            <div class="form-field">
+                {{ form.phone.label_tag }}
+                {{ form.phone }}
+            </div>
+            <div class="form-field">
+                {{ form.github_url.label_tag }}
+                {{ form.github_url }}
+            </div>
+        </div>
+
+        <!-- Ошибки формы -->
+        {% if form.errors %}
+        <div class="form-errors">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Кнопки -->
+        <div class="form-actions">
+            <a href="{% url 'users:user_detail' user.id %}" class="cancel-button">Отмена</a>
+            <button type="submit" class="save-button">Сохранить</button>
+        </div>
+
+        <!-- Блок навыков (в едином стиле) -->
+        <div class="form-field" style="margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+            <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">Навыки</label>
+            
+            <!-- Список навыков -->
+            <div id="skills-list" style="margin-bottom: 15px; min-height: 30px;">
+                {% for skill in user.skills.all %}
+                    <span class="skill-tag" style="display: inline-block; background: #f0f0f0; padding: 6px 12px; margin: 4px; border-radius: 4px; font-size: 0.9rem;">
+                        {{ skill.name }}
+                        <button type="button" class="skill-remove-btn" 
+                                data-skill-id="{{ skill.id }}" 
+                                style="margin-left: 8px; border: none; background: transparent; color: #999; cursor: pointer; font-size: 1.1rem; line-height: 1;"
+                                title="Удалить">×</button>
+                    </span>
+                {% empty %}
+                    <span class="text-muted" style="color: #999; font-size: 0.9rem;">Навыки пока не добавлены</span>
+                {% endfor %}
+            </div>
+
+            <!-- Поле добавления -->
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="new-skill-input" 
+                       placeholder="Например: Python, Figma, SQL..." 
+                       style="flex: 1; max-width: 300px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem;">
+                <button type="button" id="add-skill-btn" 
+                        style="padding: 10px 20px; background: #000; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
+                    + Добавить
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Скрипт для навыков -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // === ДОБАВЛЕНИЕ НАВЫКА ===
+    const addBtn = document.getElementById('add-skill-btn');
+    const inputField = document.getElementById('new-skill-input');
+
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            const skillName = inputField.value.trim();
+            if (!skillName) {
+                alert('Введите название навыка');
+                return;
+            }
+
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const addUrl = "{% url 'users:add_skill' user.id %}";
+
+            fetch(addUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({'name': skillName})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                } else {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось добавить навык');
+            });
+        });
+    }
+
+    // === УДАЛЕНИЕ НАВЫКА ===
+    document.querySelectorAll('.skill-remove-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!confirm('Удалить этот навык?')) return;
+
+            const skillId = this.dataset.skillId;
+            const removeUrl = "/users/{{ user.id }}/skills/" + skillId + "/remove/";
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(removeUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    window.location.reload();
+                } else {
+                    alert('Ошибка при удалении');
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+        });
+    });
+});
+</script>
+{% endblock %}
