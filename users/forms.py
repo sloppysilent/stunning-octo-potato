@@ -9,6 +9,17 @@ from django.core.validators import URLValidator
 User = get_user_model()
 
 
+AVATAR_COLORS = [
+    "#FF6B6B",
+    "#4ECDC4",
+    "#45B7D1",
+    "#96CEB4",
+    "#FFEAA7",
+]
+AVATAR_SIZE = 200
+AVATAR_FONT_SIZE = 100
+
+
 class UserRegistrationForm(forms.ModelForm):
     """Форма регистрации пользователя."""
 
@@ -124,21 +135,20 @@ class ChangePasswordForm(forms.Form):
         from PIL import Image, ImageDraw, ImageFont
 
         if user.name:
-            colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"]
-            img = Image.new("RGB", (200, 200), color=random.choice(colors))
+            img = Image.new("RGB", (AVATAR_SIZE, AVATAR_SIZE), color=random.choice(AVATAR_COLORS))
             draw = ImageDraw.Draw(img)
 
             initial = user.name[0].upper()
 
             try:
-                font = ImageFont.truetype("arial.ttf", 100)
+                font = ImageFont.truetype("arial.ttf", AVATAR_FONT_SIZE)
             except Exception:
                 font = ImageFont.load_default()
 
             bbox = draw.textbbox((0, 0), initial, font=font)
             text_width = bbox[2] - bbox[0]
             text_height = bbox[3] - bbox[1]
-            position = ((200 - text_width) // 2, (200 - text_height) // 2)
+            position = ((AVATAR_SIZE - text_width) // 2, (AVATAR_SIZE - text_height) // 2)
 
             draw.text(position, initial, fill="white", font=font)
 

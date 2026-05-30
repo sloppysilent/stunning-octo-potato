@@ -1,142 +1,39 @@
-```
+```python
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.py~
-*.py.class
-*.pyc.class
-*.pyo.class
-*.pyd.class
-*.py.class~
-*.pyc.class~
-*.pyo.class~
-*.pyd.class~
-*.py.class.py
-*.pyc.class.py
-*.pyo.class.py
-*.pyd.class.py
-*.py.class.pyc
-*.pyc.class.pyc
-*.pyo.class.pyc
-*.pyd.class.pyc
-*.py.class.pyo
-*.pyc.class.pyo
-*.pyo.class.pyo
-*.pyd.class.pyo
-*.py.class.pyd
-*.pyc.class.pyd
-*.pyo.class.pyd
-*.pyd.class.pyd
-*.py.class.py~
-*.pyc.class.py~
-*.pyo.class.py~
-*.pyd.class.py~
-*.py.class.pyc~
-*.pyc.class.pyc~
-*.pyo.class.pyc~
-*.pyd.class.pyc~
-*.py.class.pyo~
-*.pyc.class.pyo~
-*.pyo.class.pyo~
-*.pyd.class.pyo~
-*.py.class.pyd~
-*.pyc.class.pyd~
-*.pyo.class.pyd~
-*.pyd.class.pyd~
-
-# Django
-*.log
-*.pot
-*.po
-*.mo
-*.fdb_
-*.sqlite3
-*.sqlite3-journal
-media/
-staticfiles/
-
-# Environment
-.env
-.env.local
-.env.*
-
-# Dependencies
-.venv/
-venv/
+.Python
 env/
-ENV/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
+venv/
+.venv/
+.ENV
+.ENV.*
+.python-version
+.python_history
+.pytest_cache/
+.mypy_cache/
 .coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-*.pot
-*.pyc
-*.pyo
-*.pyd
-*.pyc.class
-*.pyo.class
-*.pyd.class
-*.py.class
-*.py.class~
-*.pyc.class~
-*.pyo.class~
-*.pyd.class~
-*.py.class.py
-*.pyc.class.py
-*.pyo.class.py
-*.pyd.class.py
-*.py.class.pyc
-*.pyc.class.pyc
-*.pyo.class.pyc
-*.pyd.class.pyc
-*.py.class.pyo
-*.pyc.class.pyo
-*.pyo.class.pyo
-*.pyd.class.pyo
-*.py.class.pyd
-*.pyc.class.pyd
-*.pyo.class.pyd
-*.pyd.class.pyd
-*.py.class.py~
-*.pyc.class.py~
-*.pyo.class.py~
-*.pyd.class.py~
-*.py.class.pyc~
-*.pyc.class.pyc~
-*.pyo.class.pyc~
-*.pyd.class.pyc~
-*.py.class.pyo~
-*.pyc.class.pyo~
-*.pyo.class.pyo~
-*.pyd.class.pyo~
-*.py.class.pyd~
-*.pyc.class.pyd~
-*.pyo.class.pyd~
-*.pyd.class.pyd~
+coverage/
+htmlcov/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+*.tmp
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Build and distribution
-build/
-dist/
-*.egg-info/
-*.egg
-*.whl
 ```
